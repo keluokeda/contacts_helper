@@ -9,19 +9,16 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
+import android.provider.ContactsContract.CommonDataKinds
+import android.provider.ContactsContract.CommonDataKinds.Organization
+import android.provider.ContactsContract.CommonDataKinds.StructuredName
 import android.text.TextUtils
-import android.util.Log
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import android.provider.ContactsContract.CommonDataKinds
-import android.content.ClipData.Item
-import android.content.ContentProvider
-import android.provider.ContactsContract.CommonDataKinds.Organization
-import android.provider.ContactsContract.CommonDataKinds.StructuredName
 
 
 class ContactsHelperDelegate(private val activity: Activity) {
@@ -35,7 +32,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
 
     private val resources: Resources = activity.resources
 
-    var disposable: Disposable = Observable.just(1).subscribe()
+//    var disposable: Disposable = Observable.just(1).subscribe()
 
     init {
 

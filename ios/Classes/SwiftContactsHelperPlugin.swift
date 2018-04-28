@@ -96,8 +96,11 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
                         result(FlutterError(code: "notImplemented", message: "notImplemented", details: nil))
                     }
                 }else{
-                    let e = FlutterError(code: "no permission", message: "no permission", details: nil)
-                    result(e)
+                    if call.method == "getContacts"{
+                        result([])
+                    }else{
+                        result(false)
+                    }
                 }
             }
         }

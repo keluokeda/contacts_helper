@@ -44,16 +44,12 @@ class Contact {
 
         map["phones"] = phones.map { it.toMap() }
 
-//        val emailMapList = emails.map { it.toMap() }
         map["emails"] = emails.map { it.toMap() }
 
-//        val urlMapList = urls.map { it.toMap() }
         map["urls"] = urls.map { it.toMap() }
 
-//        val addressMapList = addresses.map { it.toMap() }
         map["addresses"] = addresses.map { it.toMap() }
 
-//        val instantMessageMapList = instantMessages.map { it.toMap() }
         map["instantMessages"] = instantMessages.map { it.toMap() }
 
         map["organization"] = organization
