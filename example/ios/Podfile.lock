@@ -5,13 +5,13 @@ PODS:
 
 DEPENDENCIES:
   - contacts_helper (from `Pods/.symlinks/plugins/contacts_helper/ios`)
-  - Flutter (from `Pods/.symlinks/flutter/ios-release`)
+  - Flutter (from `Pods/.symlinks/flutter/ios`)
 
 EXTERNAL SOURCES:
   contacts_helper:
     :path: Pods/.symlinks/plugins/contacts_helper/ios
   Flutter:
-    :path: Pods/.symlinks/flutter/ios-release
+    :path: Pods/.symlinks/flutter/ios
 
 SPEC CHECKSUMS:
   contacts_helper: 39f74e73371cc9084f9ba85d11d3a654e4451cb8
