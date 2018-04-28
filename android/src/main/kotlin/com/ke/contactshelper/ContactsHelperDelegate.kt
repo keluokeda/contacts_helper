@@ -56,7 +56,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
                 .request(Manifest.permission.READ_CONTACTS)
                 .observeOn(Schedulers.io())
                 .map { permissionGranted -> return@map if (permissionGranted) getContacts(convertQuery(call.arguments)) else arrayListOf() }
-                .subscribe({ result.success(it) }, { result.error("", it.message, null) })
+                .subscribe({ result.success(it) }, { result.success(emptyList<HashMap<String,Any?>>()) })
 
     }
 
