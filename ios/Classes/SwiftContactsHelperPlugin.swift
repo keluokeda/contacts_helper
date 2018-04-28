@@ -6,27 +6,14 @@ import Contacts
 public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
     let contactsStore = CNContactStore()
     
-    
-//    let phoneTypes:[String]
-    
     let phoneTypeLabels :[Pair]
-    
-    
-    
-    
-//    let emailTypes:[String]
     
     let emailTypeLabels:[Pair]
     
-//    let urlTypes:[String]
-    
     let urlTypeLabels :[Pair]
-    
-//    let addressTypes:[String]
     
     let addressTypeLabels:[Pair]
     
-//    let instantMessageTypes:[String]
     
     let instantMessageTypeLabels:[Pair]
     
@@ -174,7 +161,6 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
         
         do {
             try contactsStore.enumerateContacts(with: fetchRequest, usingBlock: { (contact, stop) in
-                //                print(contact)
                 contacts.append(contact)
             })
         } catch  {
@@ -237,6 +223,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
         contact.organizationName = dictionary["organization"] as? String ?? ""
         contact.jobTitle = dictionary["jobTitle"] as? String ?? ""
         contact.departmentName = dictionary["departmentName"] as? String ?? ""
+        contact.note = dictionary["note"] as? String ?? ""
 //        contact.imageData = (dictionary["avatar"] as? FlutterStandardTypedData)?.data ?? Data()
         
         if let phoneNumbers = dictionary["phones"] as? [[String:String]]{
@@ -363,7 +350,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
             for address in contact.postalAddresses{
                 var addressDictionary = [String:String]()
                 addressDictionary["label"] = CNLabeledValue<NSString>.localizedString(forLabel: address.label!)
-                addressDictionary["street"] = address.value.street.replacingOccurrences(of: "\n", with: "")
+                addressDictionary["street"] = address.value.street
                 addressDictionary["city"] = address.value.city
                 addressDictionary["postcode"] = address.value.postalCode
                 addressDictionary["state"] = address.value.state

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:contacts_helper/contacts_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -226,7 +224,6 @@ class _QueryParametersState extends State<QueryParameters>
     );
   }
 
-  // TODO: implement wantKeepAlive
   @override
   bool get wantKeepAlive => true;
 }
@@ -242,7 +239,6 @@ class ContactDetail extends StatefulWidget {
   _ContactInfoState createState() => new _ContactInfoState();
 }
 
-const start_index = 10;
 
 class _ContactInfoState extends State<ContactDetail> {
 
@@ -359,8 +355,9 @@ class _ContactInfoState extends State<ContactDetail> {
     _jobTitleController.text = contact.jobTitle;
     _noteController.text = contact.note;
 
+    print("$_urlLabels");
+
     setState(() {
-//      print(contact);
     });
   }
 
@@ -378,27 +375,14 @@ class _ContactInfoState extends State<ContactDetail> {
       ),
       body: contact == null
           ? new Center(child: new CircularProgressIndicator())
-          : _buildContactView(),
+          : _buildContentView(),
     );
   }
 
 
-  Widget _buildContactView() {
-    //fix delete bug
-//    String key = new DateTime.now().millisecondsSinceEpoch.toString();
-//    return new Form(
-//        key: _formKey,
-//        child: new ListView.builder(
-////            key: new Key(key),
-//            itemCount: getListViewCount(),
-//            itemBuilder: (_, position) => _buildListItem(position)));
 
-//    return _buildContentWidgets();
 
-    return _buildContentView1();
-  }
-
-  Widget _buildContentView1() {
+  Widget _buildContentView() {
     return new ListView(
       children: <Widget>[
         _buildAvatar(),
@@ -410,6 +394,7 @@ class _ContactInfoState extends State<ContactDetail> {
         _buildOrganizationForm(),
         _buildDepartmentNameForm(),
         _buildJobTitleForm(),
+        _buildNoteForm(),
         new LabelValueView(labels: _phoneLabels,
           type: "phone",
           labelValues: contact.phones,
@@ -429,183 +414,6 @@ class _ContactInfoState extends State<ContactDetail> {
           editable: _editable,),
       ],
     );
-  }
-
-  void onDataChanged() {
-    setState(() {
-
-    });
-  }
-
-
-  Widget _buildContentWidgets() {
-    return new SingleChildScrollView(
-      child: new Form(
-        key: _formKey,
-        child: new Column(
-          children: <Widget>[
-            _buildAvatar(),
-            _buildGivenNameForm(),
-            _buildMiddleNameForm(),
-            _buildFamilyNameForm(),
-            _buildNamePrefixForm(),
-            _buildNameSuffixForm(),
-            _buildOrganizationForm(),
-            _buildDepartmentNameForm(),
-            _buildJobTitleForm(),
-            _buildNoteForm(),
-            _buildPhoneWidgets(),
-            _buildEmailWidgets(),
-            _buildUrlWidgets(),
-            _buildAddressWidgets(),
-            _buildIMWidgets()
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  Widget _buildPhoneWidgets() {
-    if (getPhoneCount() == 0) {
-      return new Divider();
-    }
-    List<Widget> list = contact.phones.map((labelValue) {
-      return _buildLabelValueSection(
-          labelValue, true, Icons.call, TextInputType.phone, "phone",
-          contact.phones);
-    }).toList();
-
-
-    return new Column(
-      key: new Key(getKey("phone")),
-      children: list,
-    );
-  }
-
-  Widget _buildEmailWidgets() {
-    if (getEmailCount() == 0) {
-      return new Divider();
-    }
-    List<Widget> list = contact.emails.map((labelValue) {
-      return _buildLabelValueSection(
-          labelValue, true, Icons.email, TextInputType.emailAddress, "email",
-          contact.emails);
-    }).toList();
-
-    return new Column(
-      key: new Key(getKey("email")),
-      children: list,
-    );
-  }
-
-
-  Widget _buildUrlWidgets() {
-    if (getUrlCount() == 0) {
-      return new Divider();
-    }
-
-    List<Widget> list = contact.urls.map((labelValue) {
-      if (_urlLabels.isEmpty) { //android
-        return new ListTile(
-          leading:
-          _buildLeading(Icons.web),
-          title: new TextFormField(initialValue: labelValue.value,
-            keyboardType: TextInputType.url,
-            decoration: new InputDecoration(hintText: "url"),),
-          trailing: _editable ? new IconButton(
-              icon: new Icon(Icons.clear), onPressed: () {
-            removeLabelValue(labelValue, contact.urls);
-          }) : null,
-        );
-      } else {
-        return _buildLabelValueSection(
-            labelValue, true, Icons.web, TextInputType.url, "url",
-            contact.urls);
-      }
-    }).toList();
-
-    return new Column(
-      key: new Key(getKey("url")),
-      children: list,
-    );
-  }
-
-  Widget _buildAddressWidgets() {
-    if (getAddressCount() == 0) {
-      return new Divider();
-    }
-
-    List<Widget> list = contact.addresses.map((address) {
-      return _buildAddressWidget(true, address);
-    }).toList();
-
-    return new Column(
-      key: new Key(getKey("address")),
-      children: list,
-    );
-  }
-
-  Widget _buildIMWidgets() {
-    if (getIMCount() == 0) {
-      return new Divider();
-    }
-    List<Widget> list = contact.instantMessages.map((labelValue) {
-      return _buildLabelValueSection(
-          labelValue, true, Icons.message, TextInputType.text, "IM",
-          contact.instantMessages);
-    }).toList();
-
-    return new Column(
-      key: new Key(getKey("IM")),
-      children: list,
-    );
-  }
-
-  String getKey(String prefix) {
-    String time = new DateTime.now().millisecondsSinceEpoch.toString();
-    return "$prefix $time";
-  }
-
-
-  Widget _buildListItem(int position) {
-    if (position == 0) {
-      return _buildAvatar();
-    }
-    if (position == 1) {
-      return _buildGivenNameForm();
-    } else if (position == 2) {
-      return _buildMiddleNameForm();
-    } else if (position == 3) {
-      return _buildFamilyNameForm();
-    } else if (position == 4) {
-      return _buildNamePrefixForm();
-    } else if (position == 5) {
-      return _buildNameSuffixForm();
-    } else if (position == 6) {
-      return _buildOrganizationForm();
-    } else if (position == 7) {
-      return _buildDepartmentNameForm();
-    } else if (position == 8) {
-      return _buildJobTitleForm();
-    } else if (position == 9) {
-      return _buildNoteForm();
-    } else
-    if (position >= getPhoneStartIndex() && position <= getPhoneEndIndex()) {
-      return _buildPhoneSection(position);
-    } else
-    if (position >= getEmailStartIndex() && position <= getEmailEndIndex()) {
-      return _buildEmailSection(position);
-    } else if (position >= getUrlStartIndex() && position <= getUrlEndIndex()) {
-      return _buildUrlSection(position);
-    } else if (position >= getAddressStartIndex() &&
-        position <= getAddressEndIndex()) {
-      return _buildAddressSection(position);
-    } else if (position >= getIMStartIndex() && position <= getIMEndIndex()) {
-      return _buildInstantMessageSection(position);
-    }
-
-    return null;
   }
 
   Widget _buildAvatar() {
@@ -643,197 +451,11 @@ class _ContactInfoState extends State<ContactDetail> {
 
   }
 
-  Widget _buildPhoneSection(int position) {
-    int index = position - getPhoneStartIndex();
-
-    LabelValue phone = contact.phones.elementAt(index);
-
-
-    bool isFirst = position == getPhoneStartIndex();
-
-    return _buildLabelValueSection(
-        phone,
-        isFirst,
-        Icons.call,
-        TextInputType.phone,
-        "phone",
-        contact.phones
-    );
-  }
-
-
-  Widget _buildEmailSection(int position) {
-    int index = position - getEmailStartIndex();
-
-    LabelValue email = contact.emails.elementAt(index);
-
-
-    bool isFirst = position == getEmailStartIndex();
-
-    return _buildLabelValueSection(
-        email,
-        isFirst,
-        Icons.email,
-        TextInputType.emailAddress,
-        "email",
-        contact.emails
-    );
-  }
-
-  Widget _buildUrlSection(int position) {
-    int index = position - getUrlStartIndex();
-
-    LabelValue url = contact.urls.elementAt(index);
-
-
-    bool isFirst = position == getUrlStartIndex();
-
-    if (_urlLabels.isEmpty) { //android
-      return new ListTile(
-        leading: isFirst
-            ? _buildLeading(Icons.web)
-            : _buildLeading(null),
-        title: new TextFormField(initialValue: url.value,
-          keyboardType: TextInputType.url,
-          decoration: new InputDecoration(hintText: "url"),),
-        trailing: _editable ? new IconButton(
-            icon: new Icon(Icons.clear), onPressed: () {
-          removeLabelValue(url, contact.urls);
-        }) : null,
-      );
-    } else { //ios
-      return _buildLabelValueSection(
-          url,
-          isFirst,
-          Icons.web,
-          TextInputType.url,
-          "email",
-          contact.urls
-      );
-    }
-  }
-
-  Widget _buildAddressSection(int position) {
-    int index = position - getAddressStartIndex();
-
-    PostalAddress address = contact.addresses.elementAt(index);
-    bool isFirst = position == getAddressStartIndex();
-
-    List<String> labels = _addressLabels.map((v) => v).toList();
-
-    if (!labels.contains(address.label)) {
-      labels.add(address.label);
-    }
-
-    return _buildAddressWidget(isFirst, address);
-  }
-
-  Column _buildAddressWidget(bool isFirst, PostalAddress address) {
-    return new Column(
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        new ListTile(
-          leading: _buildLeading(isFirst ? Icons.location_on : null),
-          title: new TextFormField(initialValue: address.country,
-            decoration: new InputDecoration(hintText: "country"),
-            enabled: false,),
-          trailing: _editable ? new IconButton(
-              icon: new Icon(Icons.clear), onPressed: () {
-            setState(() {
-              contact.addresses.remove(address);
-            });
-          }) : null,
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.state,
-            decoration: new InputDecoration(hintText: "state"),
-            enabled: false,),
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.city,
-            decoration: new InputDecoration(hintText: "city"),
-            enabled: false,),
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.street,
-            decoration: new InputDecoration(hintText: "street"),
-            enabled: false,),
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.postcode,
-            decoration: new InputDecoration(hintText: "postcode"),
-            enabled: false,),
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new Text(address.label),
-        )
-      ],
-    );
-  }
-
-  Widget _buildInstantMessageSection(int position) {
-    int index = position - getIMStartIndex();
-
-    LabelValue labelValue = contact.instantMessages.elementAt(index);
-
-
-    bool isFirst = position == getIMStartIndex();
-
-    return _buildLabelValueSection(
-        labelValue,
-        isFirst,
-        Icons.chat,
-        TextInputType.text,
-        "IM",
-        contact.instantMessages
-    );
-  }
-
-  Widget _buildLabelValueSection(LabelValue labelValue,
-      bool isFirst, IconData icon, TextInputType keyboardType, String hint,
-      List<LabelValue> sources) {
-    return new Column(
-      children: <Widget>[
-        new ListTile(
-          leading: isFirst
-              ? _buildLeading(icon)
-              : _buildLeading(null),
-          title: new TextFormField(
-            initialValue: labelValue.value,
-            keyboardType: keyboardType,
-            decoration: new InputDecoration(hintText: hint),
-            enabled: false,),
-          trailing: _editable ? new IconButton(
-              icon: new Icon(Icons.clear), onPressed: () {
-            removeLabelValue(labelValue, sources);
-          }) : null,
-        ),
-        new ListTile(
-          leading: _buildLeading(null),
-          title: new Text(labelValue.label),
-        )
-      ],
-    );
-  }
-
-  void removeLabelValue(LabelValue labelValue, List<LabelValue> sources) {
-    setState(() {
-      sources.remove(labelValue);
-//      print("contact remove = $labelValue,contact = $contact");
-    });
-  }
-
 
   ListTile _buildNoteForm() {
     return new ListTile(
       leading: _buildLeading(Icons.comment),
       title: new TextFormField(
-//          initialValue: contact.note,
         controller: _noteController,
         decoration: new InputDecoration(hintText: "note"), enabled: _editable,),
     );
@@ -844,7 +466,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.jobTitle,
         controller: _jobTitleController,
         enabled: _editable,
         onSaved: (s) => (contact.jobTitle = s),
@@ -857,7 +478,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.departmentName,
         controller: _departmentController,
         enabled: _editable,
         onSaved: (s) => (contact.departmentName = s),
@@ -870,7 +490,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(Icons.group_work),
       title: new TextFormField(
-//          initialValue: contact.organization,
         controller: _organizationController,
         enabled: _editable,
         onSaved: (s) => (contact.organization = s),
@@ -883,7 +502,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.nameSuffix,
         controller: _nameSuffixController,
         enabled: _editable,
         onSaved: (s) => (contact.nameSuffix = s),
@@ -896,7 +514,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.namePrefix,
         controller: _namePrefixController,
         enabled: _editable,
         onSaved: (s) => (contact.namePrefix = s),
@@ -909,7 +526,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.familyName,
         controller: _familyNameController,
         enabled: _editable,
         onSaved: (s) => (contact.familyName = s),
@@ -922,7 +538,6 @@ class _ContactInfoState extends State<ContactDetail> {
     return new ListTile(
       leading: _buildLeading(null),
       title: new TextFormField(
-//          initialValue: contact.middleName,
         controller: _middleNameController,
         enabled: _editable,
         onSaved: (s) => (contact.middleName = s),
@@ -951,60 +566,7 @@ class _ContactInfoState extends State<ContactDetail> {
       backgroundColor: Colors.transparent,);
   }
 
-  int getListViewCount() {
-    return start_index + getPhoneCount() + getEmailCount() + getUrlCount() +
-        getAddressCount() + getIMCount();
-  }
 
-
-  int getPhoneCount() {
-    return contact.phones == null ? 0 : contact.phones.length;
-  }
-
-  int getPhoneStartIndex() => getPhoneCount() == 0 ? -1 : start_index;
-
-  int getPhoneEndIndex() =>
-      getPhoneCount() == 0 ? -1 : getPhoneStartIndex() + getPhoneCount() - 1;
-
-
-  int getEmailStartIndex() =>
-      getEmailCount() == 0 ? -1 : start_index + getPhoneCount();
-
-  int getEmailEndIndex() =>
-      getEmailCount() == 0 ? -1 : getEmailStartIndex() + getEmailCount() - 1;
-
-  int getEmailCount() {
-    return contact.emails == null ? 0 : contact.emails.length;
-  }
-
-  int getUrlCount() => contact.urls == null ? 0 : contact.urls.length;
-
-  int getUrlStartIndex() =>
-      getUrlCount() == 0 ? -1 : start_index + getPhoneCount() + getEmailCount();
-
-  int getUrlEndIndex() =>
-      getUrlCount() == 0 ? -1 : getUrlStartIndex() + getUrlCount() - 1;
-
-  int getAddressCount() =>
-      contact.addresses == null ? 0 : contact.addresses.length;
-
-  int getAddressStartIndex() =>
-      getAddressCount() == 0 ? -1 : start_index + getPhoneCount() +
-          getEmailCount() + getUrlCount();
-
-  int getAddressEndIndex() =>
-      getAddressCount() == 0 ? -1 : getAddressStartIndex() + getAddressCount() -
-          1;
-
-  int getIMCount() =>
-      contact.instantMessages == null ? 0 : contact.instantMessages.length;
-
-  int getIMStartIndex() =>
-      getIMCount() == 0 ? -1 : start_index + getPhoneCount() + getEmailCount() +
-          getUrlCount() + getAddressCount();
-
-  int getIMEndIndex() =>
-      getIMCount() == 0 ? -1 : getIMStartIndex() + getIMCount() - 1;
 
   void deleteContact() {
     showDialog<bool>(context: context, builder: (c) {
@@ -1056,83 +618,19 @@ class _ContactInfoState extends State<ContactDetail> {
       new IconButton(icon: new Icon(Icons.done), onPressed: () {
         insertContact();
       }),
-      new PopupMenuButton<String>(
-        itemBuilder: (_) {
-          return ["phone", "email", "url", "address", "IM"].map((label) =>
-          new PopupMenuItem<String>(child: new Text(label), value: label,))
-              .toList();
-        }, onSelected: (value) {
-        insertItem(value);
-      },),
 
     ];
   }
 
-  insertItem(String type) {
-    if ("address" == type) {
-      insertAddress();
-    } else {
-      insertLabelValue(type);
-    }
-  }
 
-  insertAddress() async {
-    PostalAddress address = await Navigator.push(context, new MaterialPageRoute(
-        builder: (_) => new AddAddressView(labels: _addressLabels,)));
-    if (address != null) {
-      setState(() {
-        contact.addresses.add(address);
-      });
-    }
-  }
 
-  insertLabelValue(String type) async {
-    LabelValue labelValue = await Navigator.push(
-        context, new MaterialPageRoute(
-        builder: (_) => new AddItemView(type: type, labels: getLabels(type),)));
 
-    if (labelValue != null) {
-      print("add item result $labelValue");
-      insertLabelValueToContact(type, labelValue);
-    }
-  }
 
-  insertLabelValueToContact(String type, LabelValue labelValue) {
-    if ("phone" == type) {
-      contact.phones.add(labelValue);
-    } else if ("url" == type) {
-      contact.urls.add(labelValue);
-    } else if ("email" == type) {
-      contact.emails.add(labelValue);
-    } else if ("IM" == type) {
-      contact.instantMessages.add(labelValue);
-    }
 
-//    print("contact = $contact");
 
-    setState(() {
 
-    });
-  }
-
-  List<String> getLabels(String type) {
-    if ("phone" == type) {
-      return _phoneLabels;
-    } else if ("email" == type) {
-      return _emailLabels;
-    } else if ("IM" == type) {
-      return _instantMessageLabels;
-    } else if ("url" == type) {
-      return _urlLabels;
-    } else if ("address" == type) {
-      return _addressLabels;
-    }
-
-    return [];
-  }
 
   insertContact() async {
-//    _formKey.currentState.save();
 
     print("insert contact = $contact");
 
@@ -1179,7 +677,6 @@ class _AddItemViewState extends State<AddItemView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     if (widget.labels.isNotEmpty) {
@@ -1278,7 +775,7 @@ class _LabelValueViewState extends MyState<LabelValueView> {
       }) : null,
     ));
 
-    if (labelValue.label != null) {
+    if (widget.labels.isNotEmpty) {
       list.add(new ListTile(
         leading: _buildLeading(null),
         title: new Text(labelValue.label),
@@ -1431,7 +928,6 @@ class _AddAddressViewState extends State<AddAddressView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     address.label = widget.labels.elementAt(0);
   }
