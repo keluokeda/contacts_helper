@@ -51,3 +51,9 @@ Iterable<String> addressLabels = await ContactsHelper.getAddressLabels();
 Iterable<String> instantMessageLabels = await ContactsHelper.getInstantMessageLabels();
 
 ```
+
+
+<img src="doc/01.png" width="400">
+<img src="doc/02.png" width="400">
+<img src="doc/03.png" width="400">
+<img src="doc/04.png" width="400">
