@@ -1,10 +1,11 @@
 # contacts_helper
 
-help you manager contacts
+help you manage contacts
 
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
-
-For help on editing plugin code, view the [documentation](https://flutter.io/platform-plugins/#edit-code).
+#  Depend on it
+Add this to your package's pubspec.yaml file:
+```
+contacts_helper:
+      git:
+        url: https://github.com/keluokeda/contacts_helper.git
+```
