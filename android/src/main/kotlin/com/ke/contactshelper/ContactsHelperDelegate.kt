@@ -27,14 +27,18 @@ class ContactsHelperDelegate(private val activity: Activity) : PluginRegistry.Ac
             if (resultCode == Activity.RESULT_OK && data != null) {
                 val uri = data.data
                 if (uri != null) {
-                    val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER)
+                    val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER, CommonDataKinds.Phone.TYPE, CommonDataKinds.Phone.LABEL)
                     val cursor = contentResolver.query(uri, projection, null, null, null)
                     if (cursor != null && cursor.moveToFirst()) {
                         val name = cursor.getString(0)
                         val mobile = cursor.getString(1)
+                        val type = cursor.getInt(2)
+                        val label = cursor.getString(3)
+                        val typeLabel = ContactsContract.CommonDataKinds.Phone.getTypeLabel(resources, type, label)
+
                         val contact = Contact().apply {
                             displayName = name
-                            phones.add(LabelValue("phone", mobile))
+                            phones.add(LabelValue(typeLabel.toString(), mobile))
                         }
 
                         result?.success(contact.toMap())

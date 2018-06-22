@@ -141,8 +141,9 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin,CNContactPickerD
 //        let name = contactProperty.contact.namePrefix
         let mobile = contactProperty.value as! CNPhoneNumber
         
+        let label = CNLabeledValue<NSString>.localizedString(forLabel: contactProperty.label!)
         
-        print("nane = \(displayName) mobile = \(mobile.stringValue)")
+//        print("nane = \(displayName) mobile = \(mobile.stringValue) label = \(label)")
         
         var result = [String:Any]()
         result["displayName"] = displayName
@@ -152,7 +153,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin,CNContactPickerD
         
         var phoneDictionary = [String:String]()
         
-        phoneDictionary["label"] = ""
+        phoneDictionary["label"] = label
         phoneDictionary["value"] = mobile.stringValue
         
         phoneNumbers.append(phoneDictionary)
@@ -379,6 +380,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin,CNContactPickerD
             var phoneNumbers = [[String:String]]()
             
             for phone in contact.phoneNumbers{
+                
                 var phoneDictionary = [String:String]()
                 
                 phoneDictionary["label"] = CNLabeledValue<NSString>.localizedString(forLabel: phone.label!)
