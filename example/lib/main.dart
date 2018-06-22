@@ -10,13 +10,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
-
   Iterable<Contact> _contacts;
 
-
   Query query = new Query();
-
 
   @override
   initState() {
@@ -36,6 +32,8 @@ class _MyAppState extends State<MyApp> {
       print(e);
     }
 
+    print("contacts = $list");
+
     if (!mounted) {
       return;
     }
@@ -51,23 +49,36 @@ class _MyAppState extends State<MyApp> {
       appBar: new AppBar(
         title: new Text("Contacts"),
         actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.refresh), onPressed: () {
-            setState(() {
-              _contacts = null;
-            });
+          new IconButton(
+              icon: Icon(Icons.import_contacts), onPressed: pickContact),
+          new IconButton(
+              icon: new Icon(Icons.refresh),
+              onPressed: () {
+                setState(() {
+                  _contacts = null;
+                });
 
-            loadContacts();
-          }),
+                loadContacts();
+              }),
           new IconButton(
               icon: new Icon(Icons.more_vert), onPressed: getQueryParameters),
-          new IconButton(icon: new Icon(Icons.add), onPressed: () {
-            toContactDetailView(null);
-          })
+          new IconButton(
+              icon: new Icon(Icons.add),
+              onPressed: () {
+                toContactDetailView(null);
+              })
         ],
       ),
-      body: _contacts == null ? new Center(
-          child: new CircularProgressIndicator()) : _buildContactListView(),
+      body: _contacts == null
+          ? new Center(child: new CircularProgressIndicator())
+          : _buildContactListView(),
     );
+  }
+
+  pickContact() async {
+    Contact contact = await ContactsHelper.pickContactPhone();
+
+    print("pick result = $contact");
   }
 
   getQueryParameters() async {
@@ -80,28 +91,41 @@ class _MyAppState extends State<MyApp> {
     loadContacts();
   }
 
-
   Widget _buildContactListView() {
-    return new ListView.builder(itemBuilder: (_, position) {
-      Contact c = _contacts.elementAt(position);
-      return new ListTile(
-        leading: c.avatar != null ? new CircleAvatar(
-          backgroundImage: new MemoryImage(c.avatar),) : new CircleAvatar(
-          child: new Text(c.sortKey != null ? c.sortKey : c.displayName[0]),),
-        title: new Text(c.displayName),
-        onTap: () {
-          toContactDetailView(c);
-        },
-      );
-    }, itemCount: _contacts == null ? 0 : _contacts.length,);
+    return new ListView.builder(
+      itemBuilder: (_, position) {
+        Contact c = _contacts.elementAt(position);
+
+        print("contact = $c");
+        return new ListTile(
+          leading: c.avatar != null
+              ? new CircleAvatar(
+                  backgroundImage: new MemoryImage(c.avatar),
+                )
+              : new CircleAvatar(
+                  child: new Text(
+                      c.sortKey != null ? c.sortKey : c.displayName[0]),
+                ),
+          title: new Text(c.displayName ?? "null"),
+          onTap: () {
+            toContactDetailView(c);
+          },
+        );
+      },
+      itemCount: _contacts == null ? 0 : _contacts.length,
+    );
   }
 
-
   toContactDetailView(Contact contact) async {
-    Contact result = await Navigator.push(context, new MaterialPageRoute(
-        builder: (_) => new ContactDetail(contact: contact,)));
+    Contact result = await Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (_) => new ContactDetail(
+                  contact: contact,
+                )));
 
-    if (result == null) { //delete
+    if (result == null) {
+      //delete
 
       setState(() {
         _contacts = null;
@@ -128,10 +152,12 @@ class _QueryParametersState extends State<QueryParameters>
       appBar: new AppBar(
         title: new Text("Query paramaters"),
         actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.done), onPressed: () {
-            query.keywords = _controller.text;
-            Navigator.pop(context, query);
-          })
+          new IconButton(
+              icon: new Icon(Icons.done),
+              onPressed: () {
+                query.keywords = _controller.text;
+                Navigator.pop(context, query);
+              })
         ],
       ),
       body: new ListView(
@@ -139,44 +165,55 @@ class _QueryParametersState extends State<QueryParameters>
           new ListTile(
             title: new TextFormField(
               decoration: new InputDecoration(hintText: "Keywords"),
-              controller: _controller,),
+              controller: _controller,
+            ),
           ),
-          new SwitchListTile(value: query.sortKey,
+          new SwitchListTile(
+            value: query.sortKey,
             onChanged: (v) {
               setState(() {
                 query.sortKey = v;
               });
             },
-            title: new Text("Contain sort key"),),
-          new SwitchListTile(value: query.avatar,
+            title: new Text("Contain sort key"),
+          ),
+          new SwitchListTile(
+            value: query.avatar,
             onChanged: (v) {
               setState(() {
                 query.avatar = v;
               });
             },
-            title: new Text("Contain avatar"),),
-          new SwitchListTile(value: query.name,
+            title: new Text("Contain avatar"),
+          ),
+          new SwitchListTile(
+            value: query.name,
             onChanged: (v) {
               setState(() {
                 query.name = v;
               });
             },
             title: new Text("Contain name"),
-            subtitle: new Text("Always contain display name"),),
-          new SwitchListTile(value: query.phoneNumber,
+            subtitle: new Text("Always contain display name"),
+          ),
+          new SwitchListTile(
+            value: query.phoneNumber,
             onChanged: (v) {
               setState(() {
                 query.phoneNumber = v;
               });
             },
-            title: new Text("Contains phone number"),),
-          new SwitchListTile(value: query.email,
+            title: new Text("Contains phone number"),
+          ),
+          new SwitchListTile(
+            value: query.email,
             onChanged: (v) {
               setState(() {
                 query.email = v;
               });
             },
-            title: new Text("Contains email"),),
+            title: new Text("Contains email"),
+          ),
           new SwitchListTile(
             value: query.company,
             onChanged: (v) {
@@ -185,40 +222,45 @@ class _QueryParametersState extends State<QueryParameters>
               });
             },
             title: new Text("Contain company"),
-            subtitle: new Text("organization,department name and job title"),),
-
-          new SwitchListTile(value: query.address,
+            subtitle: new Text("organization,department name and job title"),
+          ),
+          new SwitchListTile(
+            value: query.address,
             onChanged: (v) {
               setState(() {
                 query.address = v;
               });
             },
-            title: new Text("Contains postal address"),),
-
-          new SwitchListTile(value: query.note,
+            title: new Text("Contains postal address"),
+          ),
+          new SwitchListTile(
+            value: query.note,
             onChanged: (v) {
               setState(() {
                 query.note = v;
               });
             },
-            title: new Text("Contain note"),),
-
-          new SwitchListTile(value: query.instantMessage,
+            title: new Text("Contain note"),
+          ),
+          new SwitchListTile(
+            value: query.instantMessage,
             onChanged: (v) {
               setState(() {
                 query.instantMessage = v;
               });
             },
             title: new Text("Contains IM"),
-            subtitle: new Text("Like MSN Skype"),),
-
-          new SwitchListTile(value: query.url,
+            subtitle: new Text("Like MSN Skype"),
+          ),
+          new SwitchListTile(
+            value: query.url,
             onChanged: (v) {
               setState(() {
                 query.url = v;
               });
             },
-            title: new Text("Contains URL"),),
+            title: new Text("Contains URL"),
+          ),
         ],
       ),
     );
@@ -228,10 +270,8 @@ class _QueryParametersState extends State<QueryParameters>
   bool get wantKeepAlive => true;
 }
 
-
 class ContactDetail extends StatefulWidget {
   final Contact contact;
-
 
   ContactDetail({this.contact});
 
@@ -239,14 +279,10 @@ class ContactDetail extends StatefulWidget {
   _ContactInfoState createState() => new _ContactInfoState();
 }
 
-
 class _ContactInfoState extends State<ContactDetail> {
-
-
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
 
   Contact contact;
 
@@ -324,7 +360,6 @@ class _ContactInfoState extends State<ContactDetail> {
     });
   }
 
-
   initData() async {
     Iterable<String> list = await ContactsHelper.getPhoneLabels();
     list.forEach((value) => _phoneLabels.add(value));
@@ -357,8 +392,7 @@ class _ContactInfoState extends State<ContactDetail> {
 
     print("$_urlLabels");
 
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
@@ -366,9 +400,9 @@ class _ContactInfoState extends State<ContactDetail> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text(
-            widget.contact == null ? "Create new contact" : widget.contact
-                .displayName),
+        title: new Text(widget.contact == null
+            ? "Create new contact"
+            : widget.contact.displayName),
         actions: widget.contact == null
             ? _buildNewContactActions()
             : _buildPreViewActions(),
@@ -378,9 +412,6 @@ class _ContactInfoState extends State<ContactDetail> {
           : _buildContentView(),
     );
   }
-
-
-
 
   Widget _buildContentView() {
     return new ListView(
@@ -395,23 +426,35 @@ class _ContactInfoState extends State<ContactDetail> {
         _buildDepartmentNameForm(),
         _buildJobTitleForm(),
         _buildNoteForm(),
-        new LabelValueView(labels: _phoneLabels,
+        new LabelValueView(
+          labels: _phoneLabels,
           type: "phone",
           labelValues: contact.phones,
-          editable: _editable,),
-        new LabelValueView(labels: _emailLabels,
+          editable: _editable,
+        ),
+        new LabelValueView(
+          labels: _emailLabels,
           type: "email",
           labelValues: contact.emails,
-          editable: _editable,),
-        new LabelValueView(labels: _urlLabels,
+          editable: _editable,
+        ),
+        new LabelValueView(
+          labels: _urlLabels,
           type: "url",
           labelValues: contact.urls,
-          editable: _editable,),
-        new AddressView(labels: _addressLabels,addresses: contact.addresses,editable: _editable,),
-        new LabelValueView(labels: _instantMessageLabels,
+          editable: _editable,
+        ),
+        new AddressView(
+          labels: _addressLabels,
+          addresses: contact.addresses,
+          editable: _editable,
+        ),
+        new LabelValueView(
+          labels: _instantMessageLabels,
           type: "IM",
           labelValues: contact.instantMessages,
-          editable: _editable,),
+          editable: _editable,
+        ),
       ],
     );
   }
@@ -426,41 +469,47 @@ class _ContactInfoState extends State<ContactDetail> {
             new Align(
               alignment: Alignment.center,
               child: contact.avatar == null
-                  ? new CircleAvatar(radius: 60.0,
-                child: new Icon(
-                  Icons.account_circle, size: 120.0, color: Colors.white,),
-                backgroundColor: Colors.transparent,)
+                  ? new CircleAvatar(
+                      radius: 60.0,
+                      child: new Icon(
+                        Icons.account_circle,
+                        size: 120.0,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: Colors.transparent,
+                    )
                   : new CircleAvatar(
-                backgroundImage: new MemoryImage(contact.avatar),
-                radius: 60.0,),
+                      backgroundImage: new MemoryImage(contact.avatar),
+                      radius: 60.0,
+                    ),
             ),
             new Align(
               alignment: Alignment.bottomRight,
               child: new IconButton(
-                  icon: new Icon(Icons.camera_alt, color: Colors.white,),
+                  icon: new Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                  ),
                   onPressed: _editable ? takePhoto : null),
             )
-
           ],
         ),
       ),
     );
   }
 
-  takePhoto() {
-
-  }
-
+  takePhoto() {}
 
   ListTile _buildNoteForm() {
     return new ListTile(
       leading: _buildLeading(Icons.comment),
       title: new TextFormField(
         controller: _noteController,
-        decoration: new InputDecoration(hintText: "note"), enabled: _editable,),
+        decoration: new InputDecoration(hintText: "note"),
+        enabled: _editable,
+      ),
     );
   }
-
 
   ListTile _buildJobTitleForm() {
     return new ListTile(
@@ -562,32 +611,40 @@ class _ContactInfoState extends State<ContactDetail> {
 
   Widget _buildLeading(IconData iconData) {
     return new CircleAvatar(
-      child: new Icon(iconData, color: Colors.grey, size: 26.0,),
-      backgroundColor: Colors.transparent,);
+      child: new Icon(
+        iconData,
+        color: Colors.grey,
+        size: 26.0,
+      ),
+      backgroundColor: Colors.transparent,
+    );
   }
 
-
-
   void deleteContact() {
-    showDialog<bool>(context: context, builder: (c) {
-      return new AlertDialog(
-        title: new Text("Delete this contact?"),
-        actions: <Widget>[
-          new FlatButton(onPressed: () {
-            Navigator.pop(c, false);
-          }, child: new Text("CANCEL")),
-          new FlatButton(onPressed: () {
-            Navigator.pop(c, true);
-          }, child: new Text("DELETE")),
-        ],
-      );
-    }).then((result) {
+    showDialog<bool>(
+        context: context,
+        builder: (c) {
+          return new AlertDialog(
+            title: new Text("Delete this contact?"),
+            actions: <Widget>[
+              new FlatButton(
+                  onPressed: () {
+                    Navigator.pop(c, false);
+                  },
+                  child: new Text("CANCEL")),
+              new FlatButton(
+                  onPressed: () {
+                    Navigator.pop(c, true);
+                  },
+                  child: new Text("DELETE")),
+            ],
+          );
+        }).then((result) {
       if (result) {
         deleteContactById(contact.id);
       }
     });
   }
-
 
   deleteContactById(String contactId) async {
     bool result = await ContactsHelper.deleteContact(contactId);
@@ -602,8 +659,8 @@ class _ContactInfoState extends State<ContactDetail> {
     setState(() {
       _editable = !_editable;
     });
-    _scaffoldKey.currentState.showSnackBar(
-        new SnackBar(content: new Text("Not support")));
+    _scaffoldKey.currentState
+        .showSnackBar(new SnackBar(content: new Text("Not support")));
   }
 
   List<Widget> _buildPreViewActions() {
@@ -615,23 +672,15 @@ class _ContactInfoState extends State<ContactDetail> {
 
   List<Widget> _buildNewContactActions() {
     return [
-      new IconButton(icon: new Icon(Icons.done), onPressed: () {
-        insertContact();
-      }),
-
+      new IconButton(
+          icon: new Icon(Icons.done),
+          onPressed: () {
+            insertContact();
+          }),
     ];
   }
 
-
-
-
-
-
-
-
-
   insertContact() async {
-
     print("insert contact = $contact");
 
     bool result = await ContactsHelper.insertContact(contact);
@@ -643,7 +692,6 @@ class _ContactInfoState extends State<ContactDetail> {
 
 class NameSection extends StatefulWidget {
   final Contact contact;
-
 
   NameSection({this.contact});
 
@@ -658,11 +706,9 @@ class _NameSectionState extends State<NameSection> {
   }
 }
 
-
 class AddItemView extends StatefulWidget {
   final String type;
   final List<String> labels;
-
 
   AddItemView({this.type, this.labels});
 
@@ -690,10 +736,12 @@ class _AddItemViewState extends State<AddItemView> {
       appBar: new AppBar(
         title: new Text("Add ${widget.type}"),
         actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.done), onPressed: () {
-            labelValue.value = _controller.text;
-            Navigator.pop(context, labelValue);
-          })
+          new IconButton(
+              icon: new Icon(Icons.done),
+              onPressed: () {
+                labelValue.value = _controller.text;
+                Navigator.pop(context, labelValue);
+              })
         ],
       ),
       body: new Column(
@@ -701,26 +749,30 @@ class _AddItemViewState extends State<AddItemView> {
           new ListTile(
             title: new TextFormField(
               decoration: new InputDecoration(hintText: widget.type),
-              controller: _controller,),
-          ),
-          widget.labels.isNotEmpty ?
-          new ListTile(
-            title: new Row(
-              children: <Widget>[
-                new DropdownButton<String>(
-                    value: labelValue.label,
-                    items: widget.labels.map((label) {
-                      return new DropdownMenuItem<String>(
-                        child: new Text(label), value: label,);
-                    }).toList(),
-                    onChanged: (label) {
-                      setState(() {
-                        labelValue.label = label;
-                      });
-                    }),
-              ],
+              controller: _controller,
             ),
-          ) : new ListTile()
+          ),
+          widget.labels.isNotEmpty
+              ? new ListTile(
+                  title: new Row(
+                    children: <Widget>[
+                      new DropdownButton<String>(
+                          value: labelValue.label,
+                          items: widget.labels.map((label) {
+                            return new DropdownMenuItem<String>(
+                              child: new Text(label),
+                              value: label,
+                            );
+                          }).toList(),
+                          onChanged: (label) {
+                            setState(() {
+                              labelValue.label = label;
+                            });
+                          }),
+                    ],
+                  ),
+                )
+              : new ListTile()
         ],
       ),
     );
@@ -733,7 +785,6 @@ class LabelValueView extends StatefulWidget {
   final List<LabelValue> labelValues;
   final bool editable;
 
-
   LabelValueView({this.labels, this.type, this.labelValues, this.editable});
 
   @override
@@ -741,17 +792,15 @@ class LabelValueView extends StatefulWidget {
 }
 
 class _LabelValueViewState extends MyState<LabelValueView> {
-
   @override
   Widget build(BuildContext context) {
-    List<Widget> list = widget.labelValues.map((v) =>
-        _buildLabelValueSection(v)).toList();
+    List<Widget> list =
+        widget.labelValues.map((v) => _buildLabelValueSection(v)).toList();
 
     if (widget.editable) {
       list.add(_buildAddSection(insertLabelValue, "Add ${widget.type}"));
       list.add(new Divider());
     }
-
 
     return new Column(
       key: getKey(widget.type),
@@ -759,20 +808,24 @@ class _LabelValueViewState extends MyState<LabelValueView> {
     );
   }
 
-
-  Widget _buildLabelValueSection(LabelValue labelValue,) {
+  Widget _buildLabelValueSection(
+    LabelValue labelValue,
+  ) {
     List<Widget> list = [];
 
     list.add(new ListTile(
-      leading:
-      _buildLeading(getIcon()),
+      leading: _buildLeading(getIcon()),
       title: new TextFormField(
         initialValue: labelValue.value,
-        enabled: false,),
-      trailing: widget.editable ? new IconButton(
-          icon: new Icon(Icons.clear), onPressed: () {
-        removeLabelValue(labelValue);
-      }) : null,
+        enabled: false,
+      ),
+      trailing: widget.editable
+          ? new IconButton(
+              icon: new Icon(Icons.clear),
+              onPressed: () {
+                removeLabelValue(labelValue);
+              })
+          : null,
     ));
 
     if (widget.labels.isNotEmpty) {
@@ -781,7 +834,6 @@ class _LabelValueViewState extends MyState<LabelValueView> {
         title: new Text(labelValue.label),
       ));
     }
-
 
     return new Column(
       children: list,
@@ -802,15 +854,17 @@ class _LabelValueViewState extends MyState<LabelValueView> {
 
   insertLabelValue() async {
     LabelValue labelValue = await Navigator.push(
-        context, new MaterialPageRoute(
-        builder: (_) =>
-        new AddItemView(type: widget.type, labels: widget.labels,)));
+        context,
+        new MaterialPageRoute(
+            builder: (_) => new AddItemView(
+                  type: widget.type,
+                  labels: widget.labels,
+                )));
 
     if (labelValue != null) {
       widget.labelValues.add(labelValue);
     }
   }
-
 
   removeLabelValue(LabelValue labelValue) {
     setState(() {
@@ -824,7 +878,6 @@ class AddressView extends StatefulWidget {
   final bool editable;
   final List<String> labels;
 
-
   AddressView({this.addresses, this.editable, this.labels});
 
   @override
@@ -832,18 +885,16 @@ class AddressView extends StatefulWidget {
 }
 
 class _AddressViewState extends MyState<AddressView> {
-
-
   @override
   Widget build(BuildContext context) {
-    List<Widget> list = widget.addresses.map((address) =>
-        _buildAddressWidget(address)).toList();
+    List<Widget> list = widget.addresses
+        .map((address) => _buildAddressWidget(address))
+        .toList();
 
     if (widget.editable) {
       list.add(_buildAddSection(insertAddress, "Add address"));
       list.add(new Divider());
     }
-
 
     return new Column(
       children: list,
@@ -856,39 +907,52 @@ class _AddressViewState extends MyState<AddressView> {
       children: <Widget>[
         new ListTile(
           leading: _buildLeading(Icons.location_on),
-          title: new TextFormField(initialValue: address.country,
+          title: new TextFormField(
+            initialValue: address.country,
             decoration: new InputDecoration(hintText: "country"),
-            enabled: false,),
-          trailing: widget.editable ? new IconButton(
-              icon: new Icon(Icons.clear), onPressed: () {
-            setState(() {
-              widget.addresses.remove(address);
-            });
-          }) : null,
+            enabled: false,
+          ),
+          trailing: widget.editable
+              ? new IconButton(
+                  icon: new Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      widget.addresses.remove(address);
+                    });
+                  })
+              : null,
         ),
         new ListTile(
           leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.state,
+          title: new TextFormField(
+            initialValue: address.state,
             decoration: new InputDecoration(hintText: "state"),
-            enabled: false,),
+            enabled: false,
+          ),
         ),
         new ListTile(
           leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.city,
+          title: new TextFormField(
+            initialValue: address.city,
             decoration: new InputDecoration(hintText: "city"),
-            enabled: false,),
+            enabled: false,
+          ),
         ),
         new ListTile(
           leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.street,
+          title: new TextFormField(
+            initialValue: address.street,
             decoration: new InputDecoration(hintText: "street"),
-            enabled: false,),
+            enabled: false,
+          ),
         ),
         new ListTile(
           leading: _buildLeading(null),
-          title: new TextFormField(initialValue: address.postcode,
+          title: new TextFormField(
+            initialValue: address.postcode,
             decoration: new InputDecoration(hintText: "postcode"),
-            enabled: false,),
+            enabled: false,
+          ),
         ),
         new ListTile(
           leading: _buildLeading(null),
@@ -898,20 +962,21 @@ class _AddressViewState extends MyState<AddressView> {
     );
   }
 
-
   void insertAddress() async {
-    PostalAddress address = await Navigator.push(context, new MaterialPageRoute(
-        builder: (_) => new AddAddressView(labels: widget.labels,)));
+    PostalAddress address = await Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (_) => new AddAddressView(
+                  labels: widget.labels,
+                )));
     if (address != null) {
       widget.addresses.add(address);
     }
   }
 }
 
-
 class AddAddressView extends StatefulWidget {
   final List<String> labels;
-
 
   AddAddressView({this.labels});
 
@@ -920,11 +985,9 @@ class AddAddressView extends StatefulWidget {
 }
 
 class _AddAddressViewState extends State<AddAddressView> {
-
   PostalAddress address = new PostalAddress();
 
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-
 
   @override
   void initState() {
@@ -938,11 +1001,13 @@ class _AddAddressViewState extends State<AddAddressView> {
       appBar: new AppBar(
         title: new Text("Add Address"),
         actions: <Widget>[
-          new IconButton(icon: new Icon(Icons.done), onPressed: () {
-            _formKey.currentState.save();
+          new IconButton(
+              icon: new Icon(Icons.done),
+              onPressed: () {
+                _formKey.currentState.save();
 
-            Navigator.pop(context, address);
-          })
+                Navigator.pop(context, address);
+              })
         ],
       ),
       body: new Form(
@@ -996,7 +1061,9 @@ class _AddAddressViewState extends State<AddAddressView> {
                       value: address.label,
                       items: widget.labels.map((label) {
                         return new DropdownMenuItem<String>(
-                          child: new Text(label), value: label,);
+                          child: new Text(label),
+                          value: label,
+                        );
                       }).toList(),
                       onChanged: (label) {
                         setState(() {
@@ -1011,25 +1078,35 @@ class _AddAddressViewState extends State<AddAddressView> {
       ),
     );
   }
-
 }
 
 abstract class MyState<T extends StatefulWidget> extends State<T> {
   final Color color = Colors.pink;
 
-
   Widget _buildLeading(IconData iconData) {
     return new CircleAvatar(
-      child: new Icon(iconData, color: Colors.grey, size: 26.0,),
-      backgroundColor: Colors.transparent,);
+      child: new Icon(
+        iconData,
+        color: Colors.grey,
+        size: 26.0,
+      ),
+      backgroundColor: Colors.transparent,
+    );
   }
 
   Widget _buildAddSection(VoidCallback callback, String text) {
     return new ListTile(
-      title: new FlatButton.icon(onPressed: callback,
-        icon: new Icon(Icons.add_circle_outline, color: color,),
+      title: new FlatButton.icon(
+        onPressed: callback,
+        icon: new Icon(
+          Icons.add_circle_outline,
+          color: color,
+        ),
         label: new Text(
-          text, style: new TextStyle(color: color),),),
+          text,
+          style: new TextStyle(color: color),
+        ),
+      ),
     );
   }
 
@@ -1038,8 +1115,3 @@ abstract class MyState<T extends StatefulWidget> extends State<T> {
     return new Key("$type $time");
   }
 }
-
-
-
-
-

@@ -1,9 +1,10 @@
 import Flutter
 import UIKit
 import Contacts
+import ContactsUI
 
 @available(iOS 9.0, *)
-public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
+public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin,CNContactPickerDelegate {
     let contactsStore = CNContactStore()
     
     let phoneTypeLabels :[Pair]
@@ -16,6 +17,11 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
     
     
     let instantMessageTypeLabels:[Pair]
+    
+    var result:  FlutterResult?
+    
+    
+    
     
     public override init() {
         let phoneTypes = [CNLabelPhoneNumberiPhone,CNLabelPhoneNumberMobile,CNLabelPhoneNumberMain,CNLabelPhoneNumberHomeFax,CNLabelPhoneNumberWorkFax,CNLabelPhoneNumberOtherFax,CNLabelPhoneNumberPager]
@@ -42,7 +48,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
             Pair(first: label, second:  CNLabeledValue<NSString>.localizedString(forLabel: label))
         })
         
-   
+        
         
         
         let instantMessageTypes = [CNInstantMessageServiceAIM,CNInstantMessageServiceFacebook,CNInstantMessageServiceGaduGadu,CNInstantMessageServiceGoogleTalk,CNInstantMessageServiceICQ,CNInstantMessageServiceJabber,CNInstantMessageServiceMSN,CNInstantMessageServiceQQ,CNInstantMessageServiceSkype,CNInstantMessageServiceYahoo]
@@ -81,6 +87,8 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
             result(instantMessageTypeLabels.map({ (pair) -> String in
                 pair.second
             }))
+        }else if call.method == "pickContact"{
+            pickContact(result: result)
         }
         else{
             contactsStore.requestAccess(for: .contacts) { (r, error) in
@@ -104,6 +112,59 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
                 }
             }
         }
+    }
+    
+    func pickContact(result: @escaping FlutterResult) {
+        let controller = CNContactPickerViewController()
+        
+        controller.displayedPropertyKeys = [CNContactPhoneNumbersKey]
+        
+        controller.delegate = self
+        
+        let rootViewController = UIApplication.shared.delegate?.window??.rootViewController;
+        
+        
+        
+        rootViewController?.present(controller, animated: true, completion: nil)
+        //        controller.delegate
+        
+        self.result = result
+        
+        
+        
+        
+    }
+    
+    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contactProperty: CNContactProperty) {
+        let displayName = CNContactFormatter.string(from: contactProperty.contact, style: CNContactFormatterStyle.fullName) ?? ""
+
+//        let name = contactProperty.contact.namePrefix
+        let mobile = contactProperty.value as! CNPhoneNumber
+        
+        
+        print("nane = \(displayName) mobile = \(mobile.stringValue)")
+        
+        var result = [String:Any]()
+        result["displayName"] = displayName
+        
+        var phoneNumbers = [[String:String]]()
+        
+        
+        var phoneDictionary = [String:String]()
+        
+        phoneDictionary["label"] = ""
+        phoneDictionary["value"] = mobile.stringValue
+        
+        phoneNumbers.append(phoneDictionary)
+        
+        
+        result["phones"] = phoneNumbers
+        
+        self.result?(result)
+        
+        self.result = nil
+        
+        
     }
     
     
@@ -227,7 +288,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
         contact.jobTitle = dictionary["jobTitle"] as? String ?? ""
         contact.departmentName = dictionary["departmentName"] as? String ?? ""
         contact.note = dictionary["note"] as? String ?? ""
-//        contact.imageData = (dictionary["avatar"] as? FlutterStandardTypedData)?.data ?? Data()
+        //        contact.imageData = (dictionary["avatar"] as? FlutterStandardTypedData)?.data ?? Data()
         
         if let phoneNumbers = dictionary["phones"] as? [[String:String]]{
             for phone in phoneNumbers where phone["value"] != nil {
@@ -258,7 +319,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
             }
         }
         
-       
+        
         
         //Postal addresses
         if let postalAddresses = dictionary["addresses"] as? [[String:String]]{
@@ -269,7 +330,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
                 newAddress.postalCode = postalAddress["postcode"] ?? ""
                 newAddress.country = postalAddress["country"] ?? ""
                 newAddress.state = postalAddress["state"] ?? ""
-       
+                
                 contact.postalAddresses.append(CNLabeledValue(label:getLabel(map: postalAddress, list: addressTypeLabels), value:newAddress))
             }
         }
@@ -284,7 +345,7 @@ public class SwiftContactsHelperPlugin: NSObject, FlutterPlugin {
         
         list.forEach { (pair) in
             if label == pair.second{
-               result = pair.first
+                result = pair.first
             }
         }
         return result
@@ -442,7 +503,7 @@ struct Pair {
         self.first = first
         self.second = second
     }
-
+    
 }
 
 struct Query {

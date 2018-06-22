@@ -13,6 +13,8 @@ class ContactsHelperPlugin(private val delegate: ContactsHelperDelegate) : Metho
             val channel = MethodChannel(registrar.messenger(), CHANNEL)
             val delegate = ContactsHelperDelegate(registrar.activity())
             channel.setMethodCallHandler(ContactsHelperPlugin(delegate))
+            registrar.addActivityResultListener(delegate)
+
         }
 
         private const val CHANNEL = "github.com/keluokeda/contacts_helper"
@@ -34,6 +36,7 @@ class ContactsHelperPlugin(private val delegate: ContactsHelperDelegate) : Metho
             call.method == "getUrlLabels" -> result.success(delegate.getUrlLabels())
             call.method == "getAddressLabels" -> result.success(delegate.getAddressLabels())
             call.method == "getInstantMessageLabels" -> result.success(delegate.getIMLabels())
+            call.method == "pickContact" -> delegate.pickContact(result)
 
             else -> result.notImplemented()
         }

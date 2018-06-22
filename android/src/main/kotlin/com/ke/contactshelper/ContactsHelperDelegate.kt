@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentProviderOperation
 import android.content.ContentResolver
 import android.content.ContentUris
+import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Build
@@ -16,12 +17,45 @@ import android.text.TextUtils
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
+import io.flutter.plugin.common.PluginRegistry
 import io.reactivex.schedulers.Schedulers
 
 
-class ContactsHelperDelegate(private val activity: Activity) {
+class ContactsHelperDelegate(private val activity: Activity) : PluginRegistry.ActivityResultListener {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if (requestCode == REQUEST_CODE_PICK_CONTACT) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                val uri = data.data
+                if (uri != null) {
+                    val projection = arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER)
+                    val cursor = contentResolver.query(uri, projection, null, null, null)
+                    if (cursor != null && cursor.moveToFirst()) {
+                        val name = cursor.getString(0)
+                        val mobile = cursor.getString(1)
+                        val contact = Contact().apply {
+                            displayName = name
+                            phones.add(LabelValue("phone", mobile))
+                        }
+
+                        result?.success(contact.toMap())
+
+                        cursor.close()
+                    }
+                }
+
+            }
+
+
+            result = null
+
+            return true
+        }
+
+        return false
+    }
+
+    private var result: MethodChannel.Result? = null
+
     private val phoneTypeLabels: List<Pair<Int, String>>
 
     private val emailTypeLabels: List<Pair<Int, String>>
@@ -36,7 +70,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
 
     init {
 
-        val phoneTypes = Array(20, { i -> i + 1 })
+        val phoneTypes = Array(20) { i -> i + 1 }
         val defaultValue = "#"
 
         phoneTypeLabels = phoneTypes.map { Pair(it, ContactsContract.CommonDataKinds.Phone.getTypeLabel(resources, it, defaultValue).toString()) }.filterNot { it.second == defaultValue }
@@ -45,7 +79,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
 
         addressTypeLabels = arrayOf(1, 2, 3, 4).map { Pair(it, ContactsContract.CommonDataKinds.Email.getTypeLabel(resources, it, defaultValue).toString()) }.filterNot { it.second == defaultValue }
 
-        instantMessageTypeLabels = Array(9, { i -> i }).map { Pair(it, ContactsContract.CommonDataKinds.Im.getProtocolLabel(resources, it, defaultValue).toString()) }.filterNot { it.second == defaultValue }
+        instantMessageTypeLabels = Array(9) { i -> i }.map { Pair(it, ContactsContract.CommonDataKinds.Im.getProtocolLabel(resources, it, defaultValue).toString()) }.filterNot { it.second == defaultValue }
     }
 
 
@@ -56,7 +90,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
                 .request(Manifest.permission.READ_CONTACTS)
                 .observeOn(Schedulers.io())
                 .map { permissionGranted -> return@map if (permissionGranted) getContacts(convertQuery(call.arguments)) else arrayListOf() }
-                .subscribe({ result.success(it) }, { result.success(emptyList<HashMap<String,Any?>>()) })
+                .subscribe({ result.success(it) }, { result.success(emptyList<HashMap<String, Any?>>()) })
 
     }
 
@@ -77,6 +111,19 @@ class ContactsHelperDelegate(private val activity: Activity) {
                     }.subscribe({ result.success(it) }, { result.success(false) })
         }
 
+
+    }
+
+
+    fun pickContact(result: MethodChannel.Result) {
+        RxPermissions(activity).request(Manifest.permission.READ_CONTACTS)
+                .subscribe {
+                    if (it) {
+                        val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+                        activity.startActivityForResult(intent, REQUEST_CODE_PICK_CONTACT)
+                        this.result = result
+                    }
+                }
 
     }
 
@@ -462,5 +509,7 @@ class ContactsHelperDelegate(private val activity: Activity) {
         val IM_PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Im.DATA, ContactsContract.CommonDataKinds.Im.PROTOCOL, ContactsContract.CommonDataKinds.Im.CUSTOM_PROTOCOL)
 
         const val MIMETYPE_SELECTION = ContactsContract.Data.MIMETYPE + " = ?"
+
+        const val REQUEST_CODE_PICK_CONTACT = 22224
     }
 }

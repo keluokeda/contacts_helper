@@ -7,15 +7,18 @@ class ContactsHelper {
   static const MethodChannel _channel =
   const MethodChannel('github.com/keluokeda/contacts_helper');
 
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
 
   static Future<Iterable<Contact>> getContacts(Query query) async {
     Iterable contacts = await _channel.invokeMethod(
         "getContacts", query == null ? new Query().toMap() : query.toMap());
     return contacts.map((value) => new Contact.fromMap(value));
+  }
+
+  static Future<Contact> pickContactPhone()async{
+    var map =  await _channel.invokeMethod("pickContact");
+
+    return new Contact.fromMap(map);
+
   }
 
   static Future<bool> deleteContact(String contactId) async {
