@@ -1,11 +1,11 @@
 name: contacts_helper
 description: A Flutter plugin help you manage contacts
-version: 0.0.1
+version: 0.0.2
 author: keluokeda <y913918146@gmail.com>
 homepage: https://github.com/keluokeda/contacts_helper
 
 environment:
-  sdk: ">=1.19.0 <2.0.0"
+  sdk: ">=1.19.0 <3.0.0"
 
 dependencies:
   flutter:
